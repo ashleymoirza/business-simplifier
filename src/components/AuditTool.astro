@@ -1,5 +1,5 @@
 ---
-// No API key needed — fully local rule-based engine, zero cost
+// No API key needed — fully local rule-based engine + free website scanning
 ---
 
 <div
@@ -25,10 +25,10 @@
         </div>
         <div>
           <label for="at-industry" class="block text-sm font-medium text-neutral-700 mb-1">
-            Industry <span class="text-red-500">*</span>
+            Industry <span class="text-neutral-400 font-normal">(auto-detected if you enter a website)</span>
           </label>
           <select
-            id="at-industry" x-model="form.industry" required
+            id="at-industry" x-model="form.industry"
             class="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white"
           >
             <option value="">Select your industry…</option>
@@ -47,6 +47,35 @@
             <option>Other</option>
           </select>
         </div>
+      </div>
+
+      <!-- Website URL — NEW -->
+      <div>
+        <label for="at-website" class="block text-sm font-medium text-neutral-700 mb-1">
+          Company website
+          <span class="text-neutral-400 font-normal">(optional — scans your site for smarter recommendations)</span>
+        </label>
+        <div class="relative">
+          <input
+            type="url" id="at-website" x-model="form.website"
+            placeholder="https://yourcompany.co.za"
+            class="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none pr-10"
+          />
+          <!-- scanning spinner -->
+          <div x-show="scanning" class="absolute right-3 top-1/2 -translate-y-1/2">
+            <svg class="w-4 h-4 text-brand-500 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+          </div>
+        </div>
+        <!-- Scan status badge -->
+        <p
+          x-show="scanStatus"
+          x-text="scanStatus"
+          :class="scanSuccess ? 'text-green-700 bg-green-50 border-green-200' : 'text-amber-700 bg-amber-50 border-amber-200'"
+          class="mt-2 text-xs px-3 py-1.5 rounded-lg border inline-flex items-center gap-1.5"
+        ></p>
       </div>
 
       <!-- Employees + Revenue -->
@@ -136,9 +165,11 @@
       <!-- Submit -->
       <button
         type="submit"
-        class="w-full py-4 px-6 text-base font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition-colors shadow-md hover:shadow-lg"
+        :disabled="scanning"
+        class="w-full py-4 px-6 text-base font-bold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed rounded-xl transition-colors shadow-md hover:shadow-lg"
       >
-        Generate My Free AI Audit Report →
+        <span x-show="!scanning">Generate My Free AI Audit Report →</span>
+        <span x-show="scanning">Scanning website…</span>
       </button>
 
       <p class="text-center text-xs text-neutral-400">
@@ -156,7 +187,7 @@
       </div>
       <div>
         <p class="text-lg font-semibold text-neutral-800" x-text="loadingMessage"></p>
-        <p class="mt-1 text-sm text-neutral-500">Analysing your business details…</p>
+        <p class="mt-1 text-sm text-neutral-500">Building your personalised report…</p>
       </div>
       <div class="flex gap-2">
         <span class="w-2 h-2 bg-brand-400 rounded-full animate-bounce" style="animation-delay:0s"></span>
@@ -175,7 +206,7 @@
         <div>
           <p class="text-brand-300 text-sm font-medium uppercase tracking-wide mb-1">AI Audit Report</p>
           <h2 class="text-2xl font-bold" x-text="form.company || 'Your Business'"></h2>
-          <p class="text-brand-200 text-sm mt-1" x-text="form.industry + ' · ' + form.size + ' employees'"></p>
+          <p class="text-brand-200 text-sm mt-1" x-text="(report.resolvedIndustry || form.industry) + ' · ' + form.size + ' employees'"></p>
         </div>
         <div class="text-right bg-white/10 rounded-xl px-5 py-3">
           <p class="text-brand-200 text-xs uppercase tracking-wide">Est. Annual Saving</p>
@@ -183,6 +214,36 @@
         </div>
       </div>
       <p class="mt-4 text-brand-100 text-sm leading-relaxed" x-text="report.summary"></p>
+    </div>
+
+    <!-- ── WEBSITE INSIGHTS CARD (only shown if URL was provided) ── -->
+    <div x-show="report.websiteInsights" class="bg-white border border-brand-200 rounded-xl p-5">
+      <div class="flex items-start gap-3">
+        <div class="flex-shrink-0 w-9 h-9 bg-brand-100 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="font-bold text-neutral-900 text-sm">Website Analysis</h3>
+            <span class="text-xs text-neutral-400" x-text="report.websiteInsights && report.websiteInsights.url"></span>
+          </div>
+
+          <!-- Tech stack pills -->
+          <div x-show="report.websiteInsights && report.websiteInsights.tech && report.websiteInsights.tech.length > 0" class="mt-2 flex flex-wrap gap-1.5">
+            <span class="text-xs text-neutral-500 mr-1 self-center">Tech detected:</span>
+            <template x-for="t in (report.websiteInsights && report.websiteInsights.tech || [])" :key="t">
+              <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-brand-100 text-brand-800 rounded-full" x-text="t"></span>
+            </template>
+          </div>
+          <div x-show="report.websiteInsights && (!report.websiteInsights.tech || report.websiteInsights.tech.length === 0)" class="mt-2">
+            <span class="text-xs text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">No major platforms detected</span>
+          </div>
+
+          <p class="mt-2.5 text-sm text-neutral-600 leading-relaxed" x-text="report.websiteInsights && report.websiteInsights.summary"></p>
+        </div>
+      </div>
     </div>
 
     <!-- Top AI Opportunities -->
@@ -331,8 +392,6 @@
 
   // ─────────────────────────────────────────────────────────────────────────
   // INDUSTRY KNOWLEDGE BASE
-  // Each industry has 3 ranked opportunities, 3 quick wins, and a 3-month roadmap.
-  // Pain-point keywords boost or swap opportunities dynamically.
   // ─────────────────────────────────────────────────────────────────────────
   const INDUSTRY_DATA = {
     'Healthcare': {
@@ -350,10 +409,9 @@
       ],
       roadmap: { month1: 'Deploy WhatsApp appointment reminders and digital intake forms', month2: 'Integrate booking system with automated confirmation and follow-up flows', month3: 'Implement AI scribing for consultation notes to reclaim 25+ hours/month' },
     },
-
     'Finance & Accounting': {
       saving: { '1–10': 'R92,000', '11–50': 'R178,000', '51–200': 'R340,000', '200+': 'R680,000' },
-      summary: (c) => `${c} handles high volumes of repetitive financial data — exactly where AI delivers the fastest ROI. SA accounting firms using automation report saving 60–80% of time on data entry, reconciliation, and report generation. Your audit identifies three immediate opportunities.`,
+      summary: (c) => `${c} handles high volumes of repetitive financial data — exactly where AI delivers the fastest ROI. SA accounting firms using automation report saving 60–80% of time on data entry, reconciliation, and report generation.`,
       opportunities: [
         { title: 'Automated Invoice Capture & Coding', description: 'AI reads supplier invoices (email, photo, PDF) and posts them to your accounting system with correct GL coding. Eliminates manual data entry and reduces processing time from minutes to seconds per invoice.', tool: 'Dext (Receipt Bank)', timeSaved: '22 hrs/month', setupCost: 'R2,800', monthlyCost: 'R890', paybackWeeks: 4, difficulty: 'Low' },
         { title: 'AI Bank Reconciliation', description: 'Automatically match bank transactions to invoices and receipts. What currently takes hours per week runs in minutes with near-100% match accuracy.', tool: 'Xero AI Reconciliation', timeSaved: '16 hrs/month', setupCost: 'R1,500', monthlyCost: 'R620', paybackWeeks: 5, difficulty: 'Low' },
@@ -366,10 +424,9 @@
       ],
       roadmap: { month1: 'Implement Dext for automated invoice capture across all suppliers', month2: 'Connect bank feeds and enable AI reconciliation in Xero or Sage', month3: 'Deploy Fathom for automated client reporting and cash flow forecasting' },
     },
-
     'E-commerce & Retail': {
       saving: { '1–10': 'R75,000', '11–50': 'R155,000', '51–200': 'R310,000', '200+': 'R590,000' },
-      summary: (c) => `${c} competes in SA's fastest-growing digital retail market. AI-powered personalisation, automated customer service, and smart inventory management are the three levers that directly increase revenue and cut operational costs for online retailers.`,
+      summary: (c) => `${c} competes in SA's fastest-growing digital retail market. AI-powered personalisation, automated customer service, and smart inventory management are the three levers that directly increase revenue and cut operational costs.`,
       opportunities: [
         { title: 'AI Customer Service Chatbot', description: 'Handle order tracking, returns, product queries, and FAQs automatically via your website and WhatsApp. Resolves 70% of enquiries without human intervention, 24/7.', tool: 'Tidio AI + WhatsApp Business API', timeSaved: '30 hrs/month', setupCost: 'R5,500', monthlyCost: 'R850', paybackWeeks: 6, difficulty: 'Low' },
         { title: 'Automated Order & Inventory Management', description: 'Sync stock levels across your store and warehouse in real time. Auto-trigger reorder alerts when stock hits minimum thresholds. Eliminate overselling and stockouts.', tool: 'Inventory Planner + Shopify', timeSaved: '15 hrs/month', setupCost: 'R4,200', monthlyCost: 'R720', paybackWeeks: 8, difficulty: 'Medium' },
@@ -382,7 +439,6 @@
       ],
       roadmap: { month1: 'Deploy AI chatbot for customer service on website and WhatsApp', month2: 'Automate inventory management and reorder workflows', month3: 'Implement AI content generation for product catalogue and ad campaigns' },
     },
-
     'Education': {
       saving: { '1–10': 'R52,000', '11–50': 'R118,000', '51–200': 'R235,000', '200+': 'R420,000' },
       summary: (c) => `${c} can dramatically reduce administrative burden and improve student engagement through AI — SA education providers using automation report saving 15+ hours per staff member monthly on admin, marking, and communication.`,
@@ -398,7 +454,6 @@
       ],
       roadmap: { month1: 'Implement automated WhatsApp communication for all student touchpoints', month2: 'Deploy digital enrolment forms with automated onboarding workflows', month3: 'Introduce AI-assisted assessment and feedback tools for teaching staff' },
     },
-
     'Real Estate & Property': {
       saving: { '1–10': 'R88,000', '11–50': 'R165,000', '51–200': 'R295,000', '200+': 'R510,000' },
       summary: (c) => `${c} operates in a relationship-driven industry where the biggest cost is agent time spent on admin instead of deals. AI automation of lead qualification, viewing scheduling, and document management typically saves 25+ hours per agent per month.`,
@@ -414,7 +469,6 @@
       ],
       roadmap: { month1: 'Deploy WhatsApp auto-responder for all property portals and website enquiries', month2: 'Integrate AI lead qualification and CRM routing for hot prospect follow-up', month3: 'Automate listing creation and social media distribution for new properties' },
     },
-
     'Legal': {
       saving: { '1–10': 'R105,000', '11–50': 'R210,000', '51–200': 'R395,000', '200+': 'R720,000' },
       summary: (c) => `${c} can reclaim significant billable hours currently lost to document drafting, client intake, and administrative tasks. SA law firms adopting AI document tools report a 40–60% reduction in time spent on standard document preparation.`,
@@ -430,7 +484,6 @@
       ],
       roadmap: { month1: 'Implement digital client intake and automated matter-opening workflows', month2: 'Deploy AI document drafting for top 5 most-produced standard documents', month3: 'Integrate AI legal research tool to reduce research time on complex matters' },
     },
-
     'Manufacturing': {
       saving: { '1–10': 'R82,000', '11–50': 'R168,000', '51–200': 'R325,000', '200+': 'R610,000' },
       summary: (c) => `${c} faces constant pressure on margins, downtime, and supply chain reliability. AI-driven production monitoring, predictive maintenance, and automated procurement are the three highest-ROI opportunities for SA manufacturers right now.`,
@@ -446,7 +499,6 @@
       ],
       roadmap: { month1: 'Deploy digital quality control checklists and automated daily production reporting', month2: 'Implement AI-driven stock reordering with load shedding buffer logic', month3: 'Pilot predictive maintenance on your highest-downtime machine' },
     },
-
     'Logistics & Transport': {
       saving: { '1–10': 'R78,000', '11–50': 'R152,000', '51–200': 'R298,000', '200+': 'R565,000' },
       summary: (c) => `${c} operates in a sector where fuel, time, and admin costs are the primary margin killers. AI route optimisation, automated driver communication, and digital proof of delivery directly reduce your three biggest cost centres.`,
@@ -462,7 +514,6 @@
       ],
       roadmap: { month1: 'Deploy digital POD system and automate customer delivery notifications via WhatsApp', month2: 'Implement AI route optimisation across your fleet for fuel and time savings', month3: 'Integrate fleet data with accounting system for automated invoicing on delivery' },
     },
-
     'Hospitality & Restaurants': {
       saving: { '1–10': 'R58,000', '11–50': 'R122,000', '51–200': 'R248,000', '200+': 'R445,000' },
       summary: (c) => `${c} operates in SA's most labour-intensive industry. AI-powered reservations, automated customer communication, and smart inventory management are delivering 20–30% cost reductions for forward-thinking hospitality businesses.`,
@@ -478,7 +529,6 @@
       ],
       roadmap: { month1: 'Deploy online reservation system with automated WhatsApp confirmations and reminders', month2: 'Launch WhatsApp ordering for takeaways with kitchen integration', month3: 'Implement AI stock management and demand forecasting to cut food waste' },
     },
-
     'HR & Recruitment': {
       saving: { '1–10': 'R70,000', '11–50': 'R148,000', '51–200': 'R285,000', '200+': 'R530,000' },
       summary: (c) => `${c} handles high volumes of repetitive communication and document processing that AI automates entirely. SA recruitment agencies using AI screening report handling 3x more candidates with the same team size.`,
@@ -494,7 +544,6 @@
       ],
       roadmap: { month1: 'Deploy automated candidate communication from application to offer stage', month2: 'Implement AI CV screening for all active roles to reduce manual shortlisting', month3: 'Build AI-assisted interview scheduling and scoring rubric system' },
     },
-
     'Marketing & Advertising': {
       saving: { '1–10': 'R85,000', '11–50': 'R162,000', '51–200': 'R308,000', '200+': 'R575,000' },
       summary: (c) => `${c} operates in an industry where AI delivers the fastest ROI — content creation, campaign automation, and performance reporting are all highly automatable. Agencies using AI tools are delivering 2x the output with the same headcount.`,
@@ -510,7 +559,6 @@
       ],
       roadmap: { month1: 'Implement AI content generation workflow for all client social media and copy', month2: 'Automate campaign reporting dashboards for all active clients', month3: 'Deploy AI scheduling and performance optimisation across all managed accounts' },
     },
-
     'Professional Services / Consulting': {
       saving: { '1–10': 'R95,000', '11–50': 'R185,000', '51–200': 'R355,000', '200+': 'R660,000' },
       summary: (c) => `${c} sells expertise and time — AI automation of proposals, reporting, and client communication directly converts saved admin hours into additional billable capacity. Consultancies using AI tools are increasing billable utilisation by 15–25%.`,
@@ -526,7 +574,6 @@
       ],
       roadmap: { month1: 'Deploy AI meeting transcription and action tracking for all client engagements', month2: 'Implement AI-powered proposal generation from standard brief template', month3: 'Automate client reporting dashboards and monthly progress summaries' },
     },
-
     'Other': {
       saving: { '1–10': 'R62,000', '11–50': 'R128,000', '51–200': 'R245,000', '200+': 'R460,000' },
       summary: (c) => `${c} has clear opportunities to reduce manual workload through AI — the three opportunities below are the highest-impact starting points for most SA SMEs regardless of industry, based on the pain points you've described.`,
@@ -546,54 +593,217 @@
 
   // ─────────────────────────────────────────────────────────────────────────
   // PAIN POINT KEYWORD OVERRIDES
-  // If user mentions specific pain points, swap/boost relevant opportunities
   // ─────────────────────────────────────────────────────────────────────────
   const PAIN_KEYWORDS = {
-    whatsapp: { boost: 0, newTitle: 'WhatsApp Business Automation', newTool: 'WhatsApp Business API + Wati.io' },
-    invoice: { boost: 0, newTitle: 'Automated Invoice Processing', newTool: 'Dext + Xero AI' },
-    proposal: { boost: 0, newTitle: 'AI Proposal Generation', newTool: 'Claude API + PandaDoc' },
-    report: { boost: 1, newTitle: 'Automated Reporting & Dashboards', newTool: 'Looker Studio + Supermetrics' },
-    spreadsheet: { boost: 1, newTitle: 'Spreadsheet & Data Automation', newTool: 'Google Apps Script + Zapier' },
-    email: { boost: 2, newTitle: 'AI Email Management & Automation', newTool: 'Gmail AI + Zapier' },
-    scheduling: { boost: 0, newTitle: 'AI Scheduling & Calendar Automation', newTool: 'Calendly + WhatsApp API' },
-    booking: { boost: 0, newTitle: 'Automated Booking System', newTool: 'Calendly + WhatsApp API' },
-    stock: { boost: 1, newTitle: 'AI Inventory & Stock Management', newTool: 'Inventory Planner / Cin7' },
-    inventory: { boost: 1, newTitle: 'AI Inventory & Stock Management', newTool: 'Inventory Planner / Cin7' },
-    payroll: { boost: 2, newTitle: 'Automated Payroll Processing', newTool: 'SimplePay / PaySpace AI' },
-    social: { boost: 2, newTitle: 'AI Social Media Automation', newTool: 'Buffer AI + Canva AI' },
-    content: { boost: 2, newTitle: 'AI Content Generation', newTool: 'Claude / Jasper + Canva AI' },
+    whatsapp:    { boost: 0, newTitle: 'WhatsApp Business Automation',      newTool: 'WhatsApp Business API + Wati.io' },
+    invoice:     { boost: 0, newTitle: 'Automated Invoice Processing',       newTool: 'Dext + Xero AI' },
+    proposal:    { boost: 0, newTitle: 'AI Proposal Generation',             newTool: 'Claude API + PandaDoc' },
+    report:      { boost: 1, newTitle: 'Automated Reporting & Dashboards',   newTool: 'Looker Studio + Supermetrics' },
+    spreadsheet: { boost: 1, newTitle: 'Spreadsheet & Data Automation',      newTool: 'Google Apps Script + Zapier' },
+    email:       { boost: 2, newTitle: 'AI Email Management & Automation',   newTool: 'Gmail AI + Zapier' },
+    scheduling:  { boost: 0, newTitle: 'AI Scheduling & Calendar Automation',newTool: 'Calendly + WhatsApp API' },
+    booking:     { boost: 0, newTitle: 'Automated Booking System',           newTool: 'Calendly + WhatsApp API' },
+    stock:       { boost: 1, newTitle: 'AI Inventory & Stock Management',    newTool: 'Inventory Planner / Cin7' },
+    inventory:   { boost: 1, newTitle: 'AI Inventory & Stock Management',    newTool: 'Inventory Planner / Cin7' },
+    payroll:     { boost: 2, newTitle: 'Automated Payroll Processing',       newTool: 'SimplePay / PaySpace AI' },
+    social:      { boost: 2, newTitle: 'AI Social Media Automation',         newTool: 'Buffer AI + Canva AI' },
+    content:     { boost: 2, newTitle: 'AI Content Generation',              newTool: 'Claude / Jasper + Canva AI' },
+    crm:         { boost: 1, newTitle: 'AI CRM & Lead Management',           newTool: 'HubSpot CRM (free) + AI workflows' },
+    leads:       { boost: 1, newTitle: 'AI Lead Capture & Nurturing',        newTool: 'HubSpot CRM + WhatsApp API' },
   };
 
   // ─────────────────────────────────────────────────────────────────────────
-  // GOAL-BASED SAVINGS MULTIPLIERS
+  // TECH STACK → KEYWORD INJECTION
+  // When BuiltWith detects a platform, inject keywords that boost matching opps
   // ─────────────────────────────────────────────────────────────────────────
+  const TECH_KEYWORD_MAP = {
+    'Shopify':        ['ecommerce', 'inventory', 'orders', 'stock'],
+    'WooCommerce':    ['ecommerce', 'inventory', 'orders', 'stock'],
+    'Magento':        ['ecommerce', 'inventory', 'orders'],
+    'Xero':           ['invoice', 'accounting', 'report'],
+    'Sage':           ['invoice', 'accounting', 'payroll'],
+    'QuickBooks':     ['invoice', 'accounting'],
+    'WordPress':      ['content', 'social', 'email'],
+    'Wix':            ['content', 'booking', 'social'],
+    'Squarespace':    ['content', 'booking'],
+    'HubSpot':        ['crm', 'email', 'leads'],
+    'Salesforce':     ['crm', 'leads', 'report'],
+    'Mailchimp':      ['email', 'content', 'social'],
+    'Google Analytics': ['report'],
+    'Calendly':       ['scheduling', 'booking'],
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TEXT → INDUSTRY AUTO-DETECTION
+  // ─────────────────────────────────────────────────────────────────────────
+  const INDUSTRY_SIGNALS = [
+    { keywords: ['shop', 'cart', 'product', 'order', 'shipping', 'delivery', 'ecommerce', 'store'],   industry: 'E-commerce & Retail' },
+    { keywords: ['property', 'listing', 'rent', 'tenant', 'agent', 'estate', 'apartment', 'house'],   industry: 'Real Estate & Property' },
+    { keywords: ['patient', 'clinic', 'medical', 'health', 'doctor', 'hospital', 'pharmacy'],         industry: 'Healthcare' },
+    { keywords: ['restaurant', 'menu', 'table', 'reservation', 'food', 'dining', 'chef', 'cuisine'],  industry: 'Hospitality & Restaurants' },
+    { keywords: ['recruit', 'candidate', 'vacancy', 'hiring', 'cv', 'job', 'talent'],                 industry: 'HR & Recruitment' },
+    { keywords: ['invoice', 'accounting', 'tax', 'bookkeeping', 'financial', 'audit', 'payroll'],      industry: 'Finance & Accounting' },
+    { keywords: ['student', 'course', 'learn', 'tutor', 'school', 'education', 'training', 'lesson'], industry: 'Education' },
+    { keywords: ['manufacture', 'factory', 'production', 'assembly', 'industrial', 'machinery'],       industry: 'Manufacturing' },
+    { keywords: ['logistics', 'transport', 'fleet', 'delivery', 'freight', 'courier', 'driver'],      industry: 'Logistics & Transport' },
+    { keywords: ['attorney', 'lawyer', 'legal', 'law firm', 'conveyancing', 'litigation'],            industry: 'Legal' },
+    { keywords: ['marketing', 'advertising', 'agency', 'campaign', 'brand', 'social media', 'seo'],   industry: 'Marketing & Advertising' },
+    { keywords: ['consult', 'advise', 'strategy', 'solution', 'service', 'professional'],             industry: 'Professional Services / Consulting' },
+  ];
+
   const GOAL_MULTIPLIERS = {
-    'cut-costs': 1.15,
-    'save-time': 1.0,
+    'cut-costs':    1.15,
+    'save-time':    1.0,
     'grow-revenue': 1.2,
-    'improve-cx': 0.9,
+    'improve-cx':   0.9,
   };
 
   const LOADING_MESSAGES = [
-    'Analysing your industry benchmarks…',
-    'Identifying your highest-ROI opportunities…',
+    'Scanning your website…',
+    'Detecting your tech stack…',
+    'Analysing your business details…',
+    'Identifying highest-ROI opportunities…',
     'Calculating time and cost savings…',
     'Building your 90-day roadmap…',
-    'Finalising your personalised report…',
+    'Finalising your report…',
   ];
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // WEBSITE SCANNING
+  // ─────────────────────────────────────────────────────────────────────────
+  async function fetchWithTimeout(url, ms = 6000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), ms);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(id);
+      return res;
+    } catch (e) {
+      clearTimeout(id);
+      throw e;
+    }
+  }
+
+  async function scanWebsite(url) {
+    let text = '';
+    let tech = [];
+
+    let domain = '';
+    try {
+      domain = new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      return null;
+    }
+
+    const [textResult, techResult] = await Promise.allSettled([
+      // A — homepage text via CORS proxy
+      fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, 7000)
+        .then(r => r.json())
+        .then(d => {
+          if (!d || !d.contents) return '';
+          return d.contents
+            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ' ')
+            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ' ')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .slice(0, 4000)
+            .toLowerCase();
+        }),
+      // B — tech stack via BuiltWith free API
+      fetchWithTimeout(`https://api.builtwith.com/free1/api.json?KEY=free&LOOKUP=${domain}`, 7000)
+        .then(r => r.json())
+        .then(d => {
+          const paths = d?.Results?.[0]?.Result?.Paths;
+          if (!paths || !paths.length) return [];
+          const all = [];
+          paths.forEach(p => (p.Technologies || []).forEach(t => { if (t.Name) all.push(t.Name); }));
+          return [...new Set(all)];
+        }),
+    ]);
+
+    if (textResult.status === 'fulfilled') text = textResult.value || '';
+    if (techResult.status === 'fulfilled') tech = techResult.value || [];
+
+    return { text, tech, domain };
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // WEBSITE SIGNALS EXTRACTION
+  // ─────────────────────────────────────────────────────────────────────────
+  function extractWebsiteSignals(websiteData) {
+    const { text, tech, domain } = websiteData;
+
+    // Inject tech-based keywords
+    const injectedKeywords = [];
+    tech.forEach(t => {
+      const mapped = TECH_KEYWORD_MAP[t];
+      if (mapped) injectedKeywords.push(...mapped);
+    });
+
+    // Detect keywords in page text
+    const allKeywords = Object.keys(PAIN_KEYWORDS);
+    const detectedKeywords = allKeywords.filter(k => text.includes(k));
+
+    // Auto-detect industry from page text
+    let suggestedIndustry = '';
+    let bestScore = 0;
+    INDUSTRY_SIGNALS.forEach(({ keywords, industry }) => {
+      const score = keywords.filter(k => text.includes(k)).length;
+      if (score > bestScore) {
+        bestScore = score;
+        suggestedIndustry = industry;
+      }
+    });
+    if (bestScore < 2) suggestedIndustry = ''; // require at least 2 matching keywords
+
+    // Known tech to show in report (filter to recognisable names)
+    const knownTech = tech.filter(t => Object.keys(TECH_KEYWORD_MAP).includes(t)).slice(0, 6);
+
+    // Build summary sentence
+    let websiteSummary = '';
+    if (knownTech.length > 0) {
+      websiteSummary = `${domain} already runs ${knownTech.join(', ')} — recommendations have been tailored to work with your existing stack and highlight the highest-value additions.`;
+    } else if (text.length > 100) {
+      websiteSummary = `We scanned ${domain} and analysed your business focus. Recommendations below are personalised based on your website content.`;
+    } else {
+      websiteSummary = `We attempted to scan ${domain} but could not extract detailed content. Recommendations are based on your manual inputs.`;
+    }
+
+    return {
+      detectedTools: knownTech,
+      detectedKeywords: [...new Set([...detectedKeywords, ...injectedKeywords])],
+      suggestedIndustry,
+      websiteSummary,
+    };
+  }
 
   // ─────────────────────────────────────────────────────────────────────────
   // REPORT GENERATION ENGINE
   // ─────────────────────────────────────────────────────────────────────────
-  function generateReport(form) {
-    const industryKey = INDUSTRY_DATA[form.industry] ? form.industry : 'Other';
-    const data = INDUSTRY_DATA[industryKey];
-    const painLower = (form.pain + ' ' + form.tools).toLowerCase();
+  function generateReport(form, websiteData) {
+    let signals = null;
+    if (websiteData) {
+      signals = extractWebsiteSignals(websiteData);
+    }
 
-    // Deep clone opportunities so we don't mutate the knowledge base
+    // Resolve industry: manual selection > website auto-detection > 'Other'
+    const resolvedIndustry = form.industry
+      || (signals && signals.suggestedIndustry)
+      || 'Other';
+
+    const industryKey = INDUSTRY_DATA[resolvedIndustry] ? resolvedIndustry : 'Other';
+    const data = INDUSTRY_DATA[industryKey];
+
+    // Build the keyword string from pain points + tools + website signals
+    let painLower = (form.pain + ' ' + form.tools).toLowerCase();
+    if (signals) {
+      painLower += ' ' + signals.detectedKeywords.join(' ');
+    }
+
+    // Deep clone opportunities
     let opps = data.opportunities.map(o => ({ ...o }));
 
-    // Apply pain-point keyword overrides to opportunity titles/tools
+    // Apply pain-point keyword overrides
     Object.entries(PAIN_KEYWORDS).forEach(([keyword, override]) => {
       if (painLower.includes(keyword) && opps[override.boost]) {
         opps[override.boost] = {
@@ -604,28 +814,38 @@
       }
     });
 
-    // Personalise descriptions with company name
+    // Personalise descriptions
     opps = opps.map(o => ({
       ...o,
       description: o.description.replace('your business', form.company || 'your business'),
     }));
 
-    // Scale annual saving by team size and goal
+    // Scale saving
     const baseSaving = data.saving[form.size] || data.saving['1–10'];
     const multiplier = GOAL_MULTIPLIERS[form.goal] || 1.0;
-
-    // Parse base saving (e.g. "R135,000") and apply multiplier
     const numericBase = parseInt(baseSaving.replace(/[^0-9]/g, ''), 10);
     const adjustedNum = Math.round((numericBase * multiplier) / 1000) * 1000;
     const annualSaving = 'R' + adjustedNum.toLocaleString('en-ZA');
 
-    return {
+    const report = {
       summary: data.summary(form.company || 'Your business'),
       annualSaving,
+      resolvedIndustry,
       opportunities: opps,
       quickWins: data.quickWins,
       roadmap: data.roadmap,
     };
+
+    // Add website insights if we have them
+    if (signals && form.website) {
+      report.websiteInsights = {
+        url: websiteData.domain || form.website,
+        tech: signals.detectedTools,
+        summary: signals.websiteSummary,
+      };
+    }
+
+    return report;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -635,6 +855,10 @@
     return {
       state: 'form',
       error: '',
+      scanning: false,
+      scanStatus: '',
+      scanSuccess: false,
+      websiteData: null,
       loadingMessage: LOADING_MESSAGES[0],
       loadingInterval: null,
       report: {},
@@ -646,27 +870,65 @@
         pain: '',
         tools: '',
         goal: 'save-time',
+        website: '',
       },
       goals: [
-        { value: 'cut-costs',   label: 'Cut costs',                  icon: '💰' },
-        { value: 'save-time',   label: 'Save time',                  icon: '⏱️' },
-        { value: 'grow-revenue',label: 'Grow revenue',               icon: '📈' },
-        { value: 'improve-cx',  label: 'Better customer experience', icon: '⭐' },
+        { value: 'cut-costs',    label: 'Cut costs',                   icon: '💰' },
+        { value: 'save-time',    label: 'Save time',                   icon: '⏱️' },
+        { value: 'grow-revenue', label: 'Grow revenue',                icon: '📈' },
+        { value: 'improve-cx',   label: 'Better customer experience',  icon: '⭐' },
       ],
 
       init() {
         this.form.goal = 'save-time';
       },
 
-      runAudit() {
-        if (!this.form.company || !this.form.industry || !this.form.size || !this.form.pain) {
+      async runAudit() {
+        if (!this.form.company || !this.form.size || !this.form.pain) {
           this.error = 'Please fill in all required fields (marked with *).';
           return;
         }
+        if (!this.form.industry && !this.form.website) {
+          this.error = 'Please select an industry or enter your website URL so we can auto-detect it.';
+          return;
+        }
         this.error = '';
-        this.state = 'loading';
 
-        // Cycle loading messages for UX
+        // ── Step 1: scan website if URL provided ──
+        let websiteData = null;
+        if (this.form.website) {
+          this.scanning = true;
+          this.scanStatus = '';
+          try {
+            websiteData = await scanWebsite(this.form.website);
+            if (websiteData) {
+              const signals = extractWebsiteSignals(websiteData);
+              const techList = signals.detectedTools;
+              if (techList.length > 0) {
+                this.scanStatus = '✓ ' + techList.join(' · ') + ' detected — recommendations tailored';
+                this.scanSuccess = true;
+              } else {
+                this.scanStatus = '✓ Website scanned — content analysed';
+                this.scanSuccess = true;
+              }
+              // Auto-fill industry if blank
+              if (!this.form.industry && signals.suggestedIndustry) {
+                this.form.industry = signals.suggestedIndustry;
+              }
+            } else {
+              this.scanStatus = '⚠ Could not scan website — report based on your inputs';
+              this.scanSuccess = false;
+            }
+          } catch {
+            this.scanStatus = '⚠ Could not scan website — report based on your inputs';
+            this.scanSuccess = false;
+          }
+          this.scanning = false;
+          this.websiteData = websiteData;
+        }
+
+        // ── Step 2: loading animation ──
+        this.state = 'loading';
         let msgIdx = 0;
         this.loadingMessage = LOADING_MESSAGES[0];
         this.loadingInterval = setInterval(() => {
@@ -674,12 +936,13 @@
           this.loadingMessage = LOADING_MESSAGES[msgIdx];
         }, 900);
 
-        // Small delay so the loading animation plays — then generate instantly
+        // ── Step 3: generate report ──
         const formSnapshot = { ...this.form };
+        const wdSnapshot = this.websiteData;
         setTimeout(() => {
           clearInterval(this.loadingInterval);
           try {
-            this.report = generateReport(formSnapshot);
+            this.report = generateReport(formSnapshot, wdSnapshot);
             this.state = 'report';
             this.$nextTick(() => {
               const el = document.getElementById('audit-report');
@@ -689,7 +952,7 @@
             this.state = 'form';
             this.error = 'Something went wrong generating the report. Please try again.';
           }
-        }, 2800);
+        }, 2400);
       },
 
       downloadReport() {
@@ -701,6 +964,9 @@
         this.state = 'form';
         this.report = {};
         this.error = '';
+        this.scanStatus = '';
+        this.scanSuccess = false;
+        this.websiteData = null;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
     };
@@ -708,7 +974,7 @@
 })();
 </script>
 
-<!-- Print styles — hides everything except the report -->
+<!-- Print styles -->
 <style>
   @media print {
     header, footer, nav,
