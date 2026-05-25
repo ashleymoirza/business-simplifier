@@ -9,6 +9,7 @@ const navLinks = [
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
+const auditLink = { href: '/audit', label: 'Free AI Audit' };
 ---
 
 <header x-data="{ open: false }" class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-100/80">
@@ -35,8 +36,14 @@ const navLinks = [
           </a>
         ))}
         <a
+          href={auditLink.href}
+          class="ml-1 px-3 py-2 text-sm font-semibold text-accent-700 bg-accent-50 hover:bg-accent-100 border border-accent-200 rounded-lg transition-colors"
+        >
+          ⚡ {auditLink.label}
+        </a>
+        <a
           href="/contact"
-          class="ml-3 px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors shadow-sm"
+          class="ml-2 px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors shadow-sm"
         >
           Free Consultation
         </a>
@@ -77,6 +84,13 @@ const navLinks = [
           {link.label}
         </a>
       ))}
+      <a
+        href={auditLink.href}
+        @click="open = false"
+        class="block px-3 py-2 mt-1 text-sm font-semibold text-accent-700 bg-accent-50 border border-accent-200 rounded-lg transition-colors"
+      >
+        ⚡ {auditLink.label}
+      </a>
       <a
         href="/contact"
         @click="open = false"

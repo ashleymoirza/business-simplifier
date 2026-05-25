@@ -1,0 +1,583 @@
+---
+const apiKey = import.meta.env.PUBLIC_CLAUDE_API_KEY || '';
+---
+
+<div
+  x-data="auditTool()"
+  x-init="init()"
+  class="max-w-3xl mx-auto"
+>
+  <!-- ── FORM STATE ── -->
+  <div x-show="state === 'form'">
+    <form @submit.prevent="runAudit" class="space-y-6">
+
+      <!-- Company name + Industry -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="at-company" class="block text-sm font-medium text-neutral-700 mb-1">
+            Company name <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text" id="at-company" x-model="form.company" required
+            placeholder="e.g. Acme Pty Ltd"
+            class="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+          />
+        </div>
+        <div>
+          <label for="at-industry" class="block text-sm font-medium text-neutral-700 mb-1">
+            Industry <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="at-industry" x-model="form.industry" required
+            class="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white"
+          >
+            <option value="">Select your industry…</option>
+            <option>Healthcare</option>
+            <option>Finance & Accounting</option>
+            <option>E-commerce & Retail</option>
+            <option>Education</option>
+            <option>Real Estate & Property</option>
+            <option>Legal</option>
+            <option>Manufacturing</option>
+            <option>Logistics & Transport</option>
+            <option>Hospitality & Restaurants</option>
+            <option>HR & Recruitment</option>
+            <option>Marketing & Advertising</option>
+            <option>Professional Services / Consulting</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Employees + Revenue -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="at-size" class="block text-sm font-medium text-neutral-700 mb-1">
+            Number of employees <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="at-size" x-model="form.size" required
+            class="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white"
+          >
+            <option value="">Select…</option>
+            <option>1–10</option>
+            <option>11–50</option>
+            <option>51–200</option>
+            <option>200+</option>
+          </select>
+        </div>
+        <div>
+          <label for="at-revenue" class="block text-sm font-medium text-neutral-700 mb-1">
+            Monthly revenue (approximate)
+          </label>
+          <select
+            id="at-revenue" x-model="form.revenue"
+            class="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white"
+          >
+            <option value="">Prefer not to say</option>
+            <option>Under R50,000/month</option>
+            <option>R50K – R200K/month</option>
+            <option>R200K – R500K/month</option>
+            <option>R500K – R2M/month</option>
+            <option>Over R2M/month</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Pain points -->
+      <div>
+        <label for="at-pain" class="block text-sm font-medium text-neutral-700 mb-1">
+          Describe your top 2–3 manual or time-consuming processes <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          id="at-pain" x-model="form.pain" required rows="4"
+          placeholder="e.g. We manually answer 50+ WhatsApp messages per day. Invoice capturing takes 3 hours/week. Writing proposals takes a full day each..."
+          class="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none"
+        ></textarea>
+        <p class="mt-1 text-xs text-neutral-400">The more detail you give, the more specific the recommendations will be.</p>
+      </div>
+
+      <!-- Current tools -->
+      <div>
+        <label for="at-tools" class="block text-sm font-medium text-neutral-700 mb-1">
+          What software/tools do you currently use? <span class="text-neutral-400 font-normal">(optional)</span>
+        </label>
+        <input
+          type="text" id="at-tools" x-model="form.tools"
+          placeholder="e.g. Xero, WhatsApp Business, Google Sheets, WordPress…"
+          class="w-full px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+        />
+      </div>
+
+      <!-- Primary goal -->
+      <div>
+        <label class="block text-sm font-medium text-neutral-700 mb-2">
+          What's your primary goal? <span class="text-red-500">*</span>
+        </label>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <template x-for="goal in goals" :key="goal.value">
+            <label
+              :class="form.goal === goal.value
+                ? 'border-brand-600 bg-brand-50 text-brand-800'
+                : 'border-neutral-200 bg-white text-neutral-700 hover:border-brand-300'"
+              class="flex flex-col items-center gap-1.5 p-3 border-2 rounded-xl cursor-pointer transition-all text-center"
+            >
+              <input type="radio" :value="goal.value" x-model="form.goal" class="sr-only" />
+              <span x-text="goal.icon" class="text-xl"></span>
+              <span x-text="goal.label" class="text-xs font-medium leading-tight"></span>
+            </label>
+          </template>
+        </div>
+      </div>
+
+      <!-- Error message -->
+      <p x-show="error" x-text="error" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3"></p>
+
+      <!-- No API key warning -->
+      <div x-show="!hasApiKey" class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+        <strong>Setup required:</strong> Add your Anthropic API key as <code class="bg-amber-100 px-1 rounded">PUBLIC_CLAUDE_API_KEY</code> in your <code class="bg-amber-100 px-1 rounded">.env</code> file and redeploy. See instructions below.
+      </div>
+
+      <!-- Submit -->
+      <button
+        type="submit"
+        :disabled="loading || !hasApiKey"
+        class="w-full py-4 px-6 text-base font-bold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors shadow-md hover:shadow-lg"
+      >
+        <span x-show="!loading">Generate My Free AI Audit Report →</span>
+        <span x-show="loading">Analysing your business…</span>
+      </button>
+
+      <p class="text-center text-xs text-neutral-400">
+        No email required. Results appear instantly. Your data is not stored.
+      </p>
+    </form>
+  </div>
+
+  <!-- ── LOADING STATE ── -->
+  <div x-show="state === 'loading'" class="py-20 text-center">
+    <div class="inline-flex flex-col items-center gap-6">
+      <div class="relative w-16 h-16">
+        <div class="absolute inset-0 rounded-full border-4 border-brand-100"></div>
+        <div class="absolute inset-0 rounded-full border-4 border-brand-600 border-t-transparent animate-spin"></div>
+      </div>
+      <div>
+        <p class="text-lg font-semibold text-neutral-800" x-text="loadingMessage"></p>
+        <p class="mt-1 text-sm text-neutral-500">This takes 10–20 seconds…</p>
+      </div>
+      <div class="flex gap-2">
+        <span class="w-2 h-2 bg-brand-400 rounded-full animate-bounce" style="animation-delay:0s"></span>
+        <span class="w-2 h-2 bg-brand-400 rounded-full animate-bounce" style="animation-delay:0.15s"></span>
+        <span class="w-2 h-2 bg-brand-400 rounded-full animate-bounce" style="animation-delay:0.3s"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── REPORT STATE ── -->
+  <div x-show="state === 'report'" id="audit-report" class="space-y-6">
+
+    <!-- Report header -->
+    <div class="bg-gradient-to-r from-brand-700 to-brand-900 rounded-2xl p-6 text-white">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <p class="text-brand-300 text-sm font-medium uppercase tracking-wide mb-1">AI Audit Report</p>
+          <h2 class="text-2xl font-bold" x-text="form.company || 'Your Business'"></h2>
+          <p class="text-brand-200 text-sm mt-1" x-text="form.industry + ' · ' + form.size + ' employees'"></p>
+        </div>
+        <div class="text-right bg-white/10 rounded-xl px-5 py-3">
+          <p class="text-brand-200 text-xs uppercase tracking-wide">Est. Annual Saving</p>
+          <p class="text-3xl font-extrabold text-accent-400 mt-0.5" x-text="report.annualSaving || 'Calculating…'"></p>
+        </div>
+      </div>
+      <p class="mt-4 text-brand-100 text-sm leading-relaxed" x-text="report.summary"></p>
+    </div>
+
+    <!-- Top AI Opportunities -->
+    <div>
+      <h3 class="text-lg font-bold text-neutral-900 mb-4">Your Top AI Opportunities</h3>
+      <div class="space-y-4">
+        <template x-for="(opp, i) in report.opportunities" :key="i">
+          <div class="bg-white border border-neutral-200 rounded-xl p-5 hover:border-brand-300 hover:shadow-sm transition-all">
+            <div class="flex items-start gap-3">
+              <!-- Priority badge -->
+              <div class="flex-shrink-0 w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm font-bold" x-text="i + 1"></div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2 flex-wrap">
+                  <h4 class="font-semibold text-neutral-900" x-text="opp.title"></h4>
+                  <span
+                    :class="{
+                      'bg-green-100 text-green-800': opp.difficulty === 'Low',
+                      'bg-yellow-100 text-yellow-800': opp.difficulty === 'Medium',
+                      'bg-red-100 text-red-800': opp.difficulty === 'High'
+                    }"
+                    class="text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0"
+                    x-text="opp.difficulty + ' effort'"
+                  ></span>
+                </div>
+                <p class="mt-1.5 text-sm text-neutral-600 leading-relaxed" x-text="opp.description"></p>
+
+                <!-- Metrics row -->
+                <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div class="bg-neutral-50 rounded-lg p-2.5 text-center">
+                    <p class="text-xs text-neutral-500">Recommended tool</p>
+                    <p class="text-sm font-semibold text-brand-700 mt-0.5" x-text="opp.tool"></p>
+                  </div>
+                  <div class="bg-neutral-50 rounded-lg p-2.5 text-center">
+                    <p class="text-xs text-neutral-500">Time saved</p>
+                    <p class="text-sm font-semibold text-neutral-800 mt-0.5" x-text="opp.timeSaved"></p>
+                  </div>
+                  <div class="bg-neutral-50 rounded-lg p-2.5 text-center">
+                    <p class="text-xs text-neutral-500">Setup cost</p>
+                    <p class="text-sm font-semibold text-neutral-800 mt-0.5" x-text="opp.setupCost"></p>
+                  </div>
+                  <div class="bg-green-50 rounded-lg p-2.5 text-center">
+                    <p class="text-xs text-green-600">Payback</p>
+                    <p class="text-sm font-bold text-green-800 mt-0.5" x-text="opp.paybackWeeks + ' weeks'"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Quick Wins + Roadmap side by side -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- Quick wins -->
+      <div class="bg-accent-50 border border-accent-200 rounded-xl p-5">
+        <h3 class="font-bold text-neutral-900 mb-3 flex items-center gap-2">
+          <svg class="w-5 h-5 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Quick Wins — This Week
+        </h3>
+        <ul class="space-y-2">
+          <template x-for="(win, i) in report.quickWins" :key="i">
+            <li class="flex items-start gap-2 text-sm text-neutral-700">
+              <svg class="w-4 h-4 text-accent-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span x-text="win"></span>
+            </li>
+          </template>
+        </ul>
+      </div>
+
+      <!-- 90-day roadmap -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5">
+        <h3 class="font-bold text-neutral-900 mb-3 flex items-center gap-2">
+          <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+          </svg>
+          Your 90-Day Roadmap
+        </h3>
+        <div class="space-y-3">
+          <div class="flex gap-3">
+            <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+            <div>
+              <p class="text-xs font-semibold text-brand-700 uppercase tracking-wide">Month 1</p>
+              <p class="text-sm text-neutral-700 mt-0.5" x-text="report.roadmap && report.roadmap.month1"></p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <span class="flex-shrink-0 w-6 h-6 bg-brand-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+            <div>
+              <p class="text-xs font-semibold text-brand-600 uppercase tracking-wide">Month 2</p>
+              <p class="text-sm text-neutral-700 mt-0.5" x-text="report.roadmap && report.roadmap.month2"></p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <span class="flex-shrink-0 w-6 h-6 bg-brand-400 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+            <div>
+              <p class="text-xs font-semibold text-brand-500 uppercase tracking-wide">Month 3</p>
+              <p class="text-sm text-neutral-700 mt-0.5" x-text="report.roadmap && report.roadmap.month3"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA bar -->
+    <div class="bg-gradient-to-r from-brand-600 to-brand-800 rounded-2xl p-6 text-center text-white">
+      <h3 class="text-xl font-bold">Ready to implement this plan?</h3>
+      <p class="mt-2 text-brand-100 text-sm max-w-lg mx-auto">
+        Book your free 1-hour consultation. We'll walk through this report together and give you a clear implementation timeline, exact costs, and a step-by-step action plan.
+      </p>
+      <div class="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
+        <a
+          href="/contact"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold text-brand-950 bg-accent-400 hover:bg-accent-300 rounded-xl transition-colors shadow-lg"
+        >
+          Book Free Consultation
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </a>
+        <button
+          @click="downloadReport()"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white border-2 border-white/40 hover:border-white hover:bg-white/10 rounded-xl transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Download PDF Report
+        </button>
+      </div>
+    </div>
+
+    <!-- Start over -->
+    <div class="text-center">
+      <button
+        @click="reset()"
+        class="text-sm text-neutral-500 hover:text-neutral-700 underline underline-offset-2 transition-colors"
+      >
+        ← Run another audit
+      </button>
+    </div>
+  </div>
+
+  <!-- ── ERROR STATE ── -->
+  <div x-show="state === 'error'" class="py-16 text-center">
+    <div class="max-w-md mx-auto">
+      <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-neutral-900">Something went wrong</h3>
+      <p class="mt-2 text-sm text-neutral-600" x-text="errorMessage"></p>
+      <button
+        @click="reset()"
+        class="mt-5 px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors"
+      >
+        Try Again
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- API key injected at build time -->
+<script define:vars={{ apiKey }}>
+(function() {
+  const CLAUDE_API_KEY = apiKey;
+
+  const SYSTEM_PROMPT = `You are an expert AI implementation consultant specialising in South African SMEs.
+Analyse the business details provided and return a JSON audit report with this EXACT structure (no markdown, no explanation, only valid JSON):
+{
+  "summary": "2-3 sentence executive summary specific to this business and industry",
+  "annualSaving": "realistic R figure as string e.g. R135,000 — based on their size and pain points",
+  "opportunities": [
+    {
+      "title": "short action-oriented title",
+      "description": "specific description of what this AI does for THIS business",
+      "tool": "specific tool name (e.g. WhatsApp Business API, Xero AI, Dext, Claude API, etc.)",
+      "timeSaved": "X hours/month",
+      "setupCost": "R figure once-off",
+      "monthlyCost": "R figure/month",
+      "paybackWeeks": 6,
+      "difficulty": "Low",
+      "priority": 1
+    },
+    {
+      "title": "...",
+      "description": "...",
+      "tool": "...",
+      "timeSaved": "...",
+      "setupCost": "...",
+      "monthlyCost": "...",
+      "paybackWeeks": 8,
+      "difficulty": "Medium",
+      "priority": 2
+    },
+    {
+      "title": "...",
+      "description": "...",
+      "tool": "...",
+      "timeSaved": "...",
+      "setupCost": "...",
+      "monthlyCost": "...",
+      "paybackWeeks": 12,
+      "difficulty": "Medium",
+      "priority": 3
+    }
+  ],
+  "quickWins": [
+    "Specific free action they can take this week",
+    "Another specific free or under-R500 action",
+    "A third quick win specific to their industry"
+  ],
+  "roadmap": {
+    "month1": "Specific first implementation step for this business",
+    "month2": "Specific second implementation step",
+    "month3": "Specific third implementation step"
+  }
+}
+Rules:
+- Return ONLY the JSON object. No markdown code blocks. No explanation text.
+- Use SA-specific context: rand pricing (ZAR), WhatsApp penetration, load shedding impacts where relevant
+- Base all cost and ROI estimates on proven SA market data
+- Be specific to the EXACT industry and pain points described
+- Difficulty must be exactly: "Low", "Medium", or "High"
+- paybackWeeks must be a number (integer), not a string
+- annualSaving should be realistic — don't inflate numbers
+- Opportunities ranked 1-3 by ROI and ease of implementation`;
+
+  const LOADING_MESSAGES = [
+    'Analysing your industry benchmarks…',
+    'Identifying your highest-ROI opportunities…',
+    'Calculating time and cost savings…',
+    'Building your 90-day roadmap…',
+    'Finalising your personalised report…',
+  ];
+
+  window.auditTool = function() {
+    return {
+      state: 'form', // form | loading | report | error
+      loading: false,
+      error: '',
+      errorMessage: '',
+      hasApiKey: !!CLAUDE_API_KEY,
+      loadingMessage: LOADING_MESSAGES[0],
+      loadingInterval: null,
+      report: {},
+      form: {
+        company: '',
+        industry: '',
+        size: '',
+        revenue: '',
+        pain: '',
+        tools: '',
+        goal: 'save-time',
+      },
+      goals: [
+        { value: 'cut-costs', label: 'Cut costs', icon: '💰' },
+        { value: 'save-time', label: 'Save time', icon: '⏱️' },
+        { value: 'grow-revenue', label: 'Grow revenue', icon: '📈' },
+        { value: 'improve-cx', label: 'Better customer experience', icon: '⭐' },
+      ],
+
+      init() {
+        // Pre-select save-time goal
+        this.form.goal = 'save-time';
+      },
+
+      async runAudit() {
+        if (!this.form.company || !this.form.industry || !this.form.size || !this.form.pain) {
+          this.error = 'Please fill in all required fields (marked with *).';
+          return;
+        }
+        if (!CLAUDE_API_KEY) {
+          this.error = 'API key not configured. See setup instructions below the form.';
+          return;
+        }
+
+        this.error = '';
+        this.state = 'loading';
+
+        // Cycle loading messages
+        let msgIdx = 0;
+        this.loadingMessage = LOADING_MESSAGES[0];
+        this.loadingInterval = setInterval(() => {
+          msgIdx = (msgIdx + 1) % LOADING_MESSAGES.length;
+          this.loadingMessage = LOADING_MESSAGES[msgIdx];
+        }, 3000);
+
+        const userMessage = `Company: ${this.form.company}
+Industry: ${this.form.industry}
+Employees: ${this.form.size}
+Monthly revenue: ${this.form.revenue || 'Not specified'}
+Primary goal: ${this.goals.find(g => g.value === this.form.goal)?.label || this.form.goal}
+Main pain points and manual processes: ${this.form.pain}
+Current tools: ${this.form.tools || 'Not specified'}`;
+
+        try {
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': CLAUDE_API_KEY,
+              'anthropic-version': '2023-06-01',
+              'anthropic-dangerous-direct-browser-access': 'true',
+            },
+            body: JSON.stringify({
+              model: 'claude-haiku-4-5',
+              max_tokens: 1500,
+              system: SYSTEM_PROMPT,
+              messages: [{ role: 'user', content: userMessage }],
+            }),
+          });
+
+          clearInterval(this.loadingInterval);
+
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `API error ${response.status}`);
+          }
+
+          const data = await response.json();
+          const raw = data.content?.[0]?.text || '';
+
+          // Strip any accidental markdown code fences
+          const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+          this.report = JSON.parse(cleaned);
+          this.state = 'report';
+
+          // Scroll to report
+          this.$nextTick(() => {
+            const el = document.getElementById('audit-report');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+
+        } catch (err) {
+          clearInterval(this.loadingInterval);
+          this.errorMessage = err.message || 'An unexpected error occurred. Please try again.';
+          this.state = 'error';
+        }
+      },
+
+      downloadReport() {
+        window.print();
+      },
+
+      reset() {
+        this.state = 'form';
+        this.report = {};
+        this.error = '';
+        this.errorMessage = '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+    };
+  };
+})();
+</script>
+
+<!-- Print styles — hides everything except the report -->
+<style>
+  @media print {
+    header, footer, nav,
+    [data-no-print],
+    .fixed,
+    #at-form-section { display: none !important; }
+
+    #audit-report {
+      padding: 0 !important;
+      max-width: 100% !important;
+    }
+
+    body { background: white !important; }
+
+    a[href="/contact"] { display: none !important; }
+
+    #audit-report::before {
+      content: "Business Simplifier AI Audit Report — businesssimplifier.co.za";
+      display: block;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+  }
+</style>

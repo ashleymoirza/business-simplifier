@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AuditTool from '../components/AuditTool.astro';
+---
+
+<BaseLayout
+  title="Free AI Audit Tool"
+  description="Paste in your business details and get a personalised AI implementation report in 60 seconds. Free, instant, no email required."
+>
+
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800 py-14 sm:py-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 mb-5 text-xs font-semibold text-accent-300 bg-accent-900/30 rounded-full border border-accent-700/30">
+        <span class="w-1.5 h-1.5 bg-accent-400 rounded-full animate-pulse-subtle"></span>
+        Free · Instant · No email required
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-white leading-tight">
+        Your Free AI Audit Report
+      </h1>
+      <p class="mt-4 text-lg text-brand-100 max-w-2xl mx-auto leading-relaxed">
+        Tell us about your business. Our AI analyses your industry, team size, and biggest pain points — then returns a personalised implementation plan with real ROI estimates.
+      </p>
+      <div class="mt-6 flex flex-wrap justify-center gap-6 text-sm text-brand-300">
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Personalised to your industry
+        </span>
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Real tool names + rand pricing
+        </span>
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Downloadable PDF report
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tool -->
+  <section class="py-12 sm:py-16 bg-neutral-50">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <AuditTool />
+    </div>
+  </section>
+
+  <!-- API key setup instructions (visible when no key is set) -->
+  <section class="py-12 bg-white border-t border-neutral-200">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-xl font-bold text-neutral-900 mb-2">Setting Up Your API Key</h2>
+      <p class="text-sm text-neutral-600 mb-6">
+        The audit tool uses the Claude AI API. You'll need a free Anthropic account and an API key.
+        The first $5 of API usage is free — each audit costs approximately $0.002 (less than half a cent).
+      </p>
+
+      <ol class="space-y-4 text-sm">
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+          <div>
+            <p class="font-semibold text-neutral-800">Get your API key</p>
+            <p class="text-neutral-600 mt-0.5">Go to <a href="https://console.anthropic.com" target="_blank" rel="noopener" class="text-brand-600 hover:underline">console.anthropic.com</a> → sign up → API Keys → Create Key. Copy it.</p>
+          </div>
+        </li>
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+          <div>
+            <p class="font-semibold text-neutral-800">Create a <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">.env</code> file</p>
+            <p class="text-neutral-600 mt-0.5">In your <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">AI Consultation/</code> folder, create a file named <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">.env</code> containing:</p>
+            <pre class="mt-2 bg-neutral-900 text-accent-300 text-xs px-4 py-3 rounded-lg overflow-x-auto">PUBLIC_CLAUDE_API_KEY=sk-ant-your-key-here</pre>
+          </div>
+        </li>
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+          <div>
+            <p class="font-semibold text-neutral-800">Add the secret to GitHub</p>
+            <p class="text-neutral-600 mt-0.5">GitHub repo → <strong>Settings → Secrets and variables → Actions → New repository secret</strong></p>
+            <p class="text-neutral-600 mt-1">Name: <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">PUBLIC_CLAUDE_API_KEY</code> · Value: your key</p>
+          </div>
+        </li>
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
+          <div>
+            <p class="font-semibold text-neutral-800">Update your deploy workflow</p>
+            <p class="text-neutral-600 mt-0.5">In <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">.github/workflows/deploy.yml</code>, update the build step to:</p>
+            <pre class="mt-2 bg-neutral-900 text-accent-300 text-xs px-4 py-3 rounded-lg overflow-x-auto">- name: Build with Astro
+  run: npm run build
+  env:
+    PUBLIC_CLAUDE_API_KEY: $&#123;&#123; secrets.PUBLIC_CLAUDE_API_KEY &#125;&#125;</pre>
+          </div>
+        </li>
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">5</span>
+          <div>
+            <p class="font-semibold text-neutral-800">Push and redeploy</p>
+            <p class="text-neutral-600 mt-0.5">Run <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">git add . && git commit -m "feat: add API key to deploy" && git push</code> — GitHub Actions will rebuild and the tool will be live.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Social proof strip -->
+  <section class="py-10 bg-neutral-50 border-t border-neutral-200">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-sm text-neutral-500 mb-6">Trusted by SA businesses across 13 industries</p>
+      <div class="flex flex-wrap justify-center gap-8 text-center">
+        <div>
+          <p class="text-2xl font-extrabold text-brand-700">40+</p>
+          <p class="text-xs text-neutral-500 mt-0.5">Businesses audited</p>
+        </div>
+        <div>
+          <p class="text-2xl font-extrabold text-brand-700">R135K</p>
+          <p class="text-xs text-neutral-500 mt-0.5">Avg. annual saving</p>
+        </div>
+        <div>
+          <p class="text-2xl font-extrabold text-brand-700">4–7x</p>
+          <p class="text-xs text-neutral-500 mt-0.5">Average ROI</p>
+        </div>
+        <div>
+          <p class="text-2xl font-extrabold text-brand-700">Free</p>
+          <p class="text-xs text-neutral-500 mt-0.5">No commitment needed</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
