@@ -20,16 +20,37 @@ import SITE_CONFIG from '../lib/seo';
           service: 'strategy',
           message: '',
           submitted: false,
+          submitting: false,
           error: '',
           async handleSubmit() {
             this.error = '';
-            // Basic validation
             if (!this.name || !this.email || !this.message) {
               this.error = 'Please fill in all required fields.';
               return;
             }
-            // In production, send to your form endpoint
-            this.submitted = true;
+            this.submitting = true;
+            try {
+              const res = await fetch('https://formspree.io/f/sales@businesssimplifier.co.za', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  name: this.name,
+                  email: this.email,
+                  company: this.company,
+                  service: this.service,
+                  message: this.message,
+                }),
+              });
+              if (res.ok) {
+                this.submitted = true;
+              } else {
+                this.error = 'Something went wrong. Please email us directly at sales@businesssimplifier.co.za';
+              }
+            } catch(e) {
+              this.error = 'Could not send message. Please email sales@businesssimplifier.co.za directly.';
+            } finally {
+              this.submitting = false;
+            }
           }
         }"
         @submit.prevent="handleSubmit"
@@ -102,9 +123,11 @@ import SITE_CONFIG from '../lib/seo';
 
           <button
             type="submit"
-            class="mt-6 w-full py-3 px-6 text-base font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors shadow-sm"
+            :disabled="submitting"
+            class="mt-6 w-full py-3 px-6 text-base font-semibold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
           >
-            Send Message
+            <span x-show="!submitting">Send Message</span>
+            <span x-show="submitting">Sending…</span>
           </button>
 
           <p class="mt-3 text-xs text-neutral-400 text-center">

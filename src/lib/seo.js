@@ -56,6 +56,7 @@ export function organizationSchema() {
     url: SITE_CONFIG.url,
     description: SITE_CONFIG.description,
     slogan: SITE_CONFIG.tagline,
+    email: 'sales@businesssimplifier.co.za',
     foundingDate: '2025',
     areaServed: ['ZA', 'US', 'GB', 'AU', 'DE', 'CA'],
     knowsAbout: [
