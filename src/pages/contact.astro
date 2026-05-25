@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactForm from '../components/ContactForm.astro';
+import AIChat from '../components/AIChat.astro';
+---
+
+<BaseLayout title="Contact Us" description="Book your free 1-hour AI consultation. No commitment — just a clear assessment of how AI can help your business.">
+  <section class="bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800 py-16 sm:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-white">Get in Touch</h1>
+      <p class="mt-4 text-xl text-brand-100 max-w-2xl mx-auto">
+        Book your free 1-hour consultation. No commitment. No sales pitch.
+      </p>
+    </div>
+  </section>
+
+  <ContactForm />
+
+  {/* Info section */}
+  <section class="py-12 bg-neutral-50 border-t border-neutral-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div>
+          <div class="text-3xl mb-2">📅</div>
+          <h3 class="font-semibold text-neutral-900">Free 1-Hour Session</h3>
+          <p class="mt-1 text-sm text-neutral-600">Every inquiry includes a free strategy session. No obligation.</p>
+        </div>
+        <div>
+          <div class="text-3xl mb-2">⏱️</div>
+          <h3 class="font-semibold text-neutral-900">24-Hour Response</h3>
+          <p class="mt-1 text-sm text-neutral-600">We respond to all inquiries within 24 hours.</p>
+        </div>
+        <div>
+          <div class="text-3xl mb-2">🌍</div>
+          <h3 class="font-semibold text-neutral-900">SA & International</h3>
+          <p class="mt-1 text-sm text-neutral-600">Serving South Africa and global clients with market-appropriate pricing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <AIChat prompt="Have questions before booking? Ask me!" />
+</BaseLayout>

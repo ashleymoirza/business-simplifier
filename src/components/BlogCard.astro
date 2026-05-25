@@ -1,0 +1,45 @@
+---
+export interface Props {
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  categoryName?: string;
+  publishedDate: string;
+  readTime: string;
+  tags: string[];
+}
+const { slug, title, excerpt, category, categoryName, publishedDate, readTime, tags } = Astro.props;
+---
+
+<article class="group relative bg-white rounded-xl border border-neutral-200 overflow-hidden hover:border-brand-300 hover:shadow-md transition-all">
+  <a href={"/blog/" + slug} class="block p-6">
+    {/* Category + Date row */}
+    <div class="flex items-center justify-between mb-3">
+      {categoryName && (
+        <span class="inline-block px-2.5 py-0.5 text-xs font-medium text-brand-700 bg-brand-50 rounded-full">
+          {categoryName}
+        </span>
+      )}
+      <span class="text-xs text-neutral-400">{publishedDate}</span>
+    </div>
+
+    {/* Title */}
+    <h3 class="text-lg font-semibold text-neutral-900 group-hover:text-brand-700 transition-colors leading-snug">
+      {title}
+    </h3>
+
+    {/* Excerpt */}
+    <p class="mt-2 text-sm text-neutral-600 leading-relaxed line-clamp-3">
+      {excerpt}
+    </p>
+
+    {/* Footer */}
+    <div class="mt-4 flex items-center justify-between">
+      <span class="text-xs text-neutral-400">{readTime}</span>
+      <span class="text-sm font-medium text-brand-600 group-hover:text-brand-700">
+        Read more &rarr;
+      </span>
+    </div>
+  </a>
+</article>

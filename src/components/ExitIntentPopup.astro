@@ -1,0 +1,111 @@
+---
+// Exit-intent popup — fires when cursor leaves the viewport upward on desktop
+// and on mobile after 45 seconds of inactivity
+---
+
+<div
+  x-data="{
+    show: false,
+    dismissed: false,
+    init() {
+      // Don't show if already dismissed this session
+      if (sessionStorage.getItem('exitPopupDismissed')) return;
+
+      // Desktop: mouseleave from top of viewport
+      document.addEventListener('mouseleave', (e) => {
+        if (e.clientY <= 5 && !this.dismissed) {
+          setTimeout(() => { this.show = true; }, 200);
+        }
+      });
+
+      // Mobile: show after 45s of inactivity
+      if (window.innerWidth < 768) {
+        setTimeout(() => {
+          if (!this.dismissed) this.show = true;
+        }, 45000);
+      }
+    },
+    dismiss() {
+      this.show = false;
+      this.dismissed = true;
+      sessionStorage.setItem('exitPopupDismissed', '1');
+    }
+  }"
+  x-show="show"
+  x-transition:enter="transition ease-out duration-300"
+  x-transition:enter-start="opacity-0 scale-95"
+  x-transition:enter-end="opacity-100 scale-100"
+  x-transition:leave="transition ease-in duration-200"
+  x-transition:leave-start="opacity-100 scale-100"
+  x-transition:leave-end="opacity-0 scale-95"
+  class="fixed inset-0 z-[100] flex items-center justify-center px-4"
+  style="display: none;"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="exit-popup-title"
+>
+  {/* Backdrop */}
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="dismiss()" aria-hidden="true"></div>
+
+  {/* Modal */}
+  <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+    {/* Close button */}
+    <button
+      @click="dismiss()"
+      class="absolute top-4 right-4 p-1 text-neutral-400 hover:text-neutral-600 rounded-lg transition-colors"
+      aria-label="Close popup"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    {/* Icon */}
+    <div class="w-14 h-14 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-7 h-7 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+
+    {/* Content */}
+    <h2 id="exit-popup-title" class="text-xl font-bold text-neutral-900 mb-2">
+      Before you go — get your free AI audit
+    </h2>
+    <p class="text-neutral-600 text-sm leading-relaxed mb-6">
+      In 60 minutes, we'll identify your top 3 AI opportunities and give you a clear ROI estimate — completely free, no commitment required.
+    </p>
+
+    {/* Stats */}
+    <div class="flex justify-center gap-6 mb-6">
+      <div class="text-center">
+        <p class="text-lg font-bold text-brand-700">R135K</p>
+        <p class="text-xs text-neutral-500">Avg. annual saving</p>
+      </div>
+      <div class="w-px bg-neutral-200"></div>
+      <div class="text-center">
+        <p class="text-lg font-bold text-brand-700">Free</p>
+        <p class="text-xs text-neutral-500">No commitment</p>
+      </div>
+      <div class="w-px bg-neutral-200"></div>
+      <div class="text-center">
+        <p class="text-lg font-bold text-brand-700">60 min</p>
+        <p class="text-xs text-neutral-500">All you need</p>
+      </div>
+    </div>
+
+    {/* CTA buttons */}
+    <a
+      href="/contact"
+      @click="dismiss()"
+      class="block w-full py-3 px-6 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors shadow-sm mb-3"
+    >
+      Yes — Book My Free Consultation
+    </a>
+    <button
+      @click="dismiss()"
+      class="block w-full py-2 px-6 text-sm text-neutral-500 hover:text-neutral-700 transition-colors"
+    >
+      No thanks, I'll figure it out myself
+    </button>
+  </div>
+</div>

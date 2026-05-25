@@ -1,0 +1,66 @@
+---
+import SITE_CONFIG, { GLOBAL_KEYWORDS } from '../lib/seo';
+
+export interface Props {
+  title: string;
+  fullTitle: string;
+  description: string;
+  canonical?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  author?: string;
+  noIndex?: boolean;
+}
+
+const {
+  title,
+  fullTitle,
+  description,
+  canonical = SITE_CONFIG.url,
+  image = '/og-default.png',
+  type = 'website',
+  publishedTime,
+  author,
+  noIndex = false,
+} = Astro.props;
+
+const ogImage = image.startsWith('http') ? image : `${SITE_CONFIG.url}${image}`;
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<meta name="keywords" content={GLOBAL_KEYWORDS} />
+<meta name="robots" content={noIndex ? 'noindex, nofollow' : 'index, follow'} />
+<meta name="author" content={author || SITE_CONFIG.name} />
+<meta name="geo.region" content="ZA" />
+<link rel="canonical" href={canonical} />
+<meta property="og:type" content={type} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:site_name" content={SITE_CONFIG.name} />
+<meta property="og:locale" content={SITE_CONFIG.locale} />
+<meta property="og:image" content={ogImage} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+{publishedTime && <meta property="article:published_time" content={publishedTime} />}
+{/* Performance: preconnect and font loading */}
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+{/* Load font with display=swap for faster LCP */}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+{/* Theme colour for mobile browsers */}
+<meta name="theme-color" content="#0f172a" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<script is:inline>
+  // Simple Alpine store init — no flicker
+  document.addEventListener('alpine:init', () => {
+    Alpine.store('nav', { open: false });
+  });
+</script>

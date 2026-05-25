@@ -1,0 +1,127 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPostBySlug, blogCategories } from '../../data/blogPosts';
+import { formatDate } from '../../lib/utils';
+
+/**
+ * Convert inline markdown (**bold**, *italic*, `code`) to HTML
+ */
+function inlineMarkdown(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-brand-600 underline underline-offset-2 hover:text-brand-700">$1</a>');
+}
+
+export async function getStaticPaths() {
+  const { blogPosts } = await import('../../data/blogPosts');
+  return blogPosts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+
+if (!post) {
+  return Astro.redirect('/blog');
+}
+
+const categoryName = blogCategories.find((c) => c.id === post.category)?.name || post.category;
+---
+
+<BaseLayout
+  title={post.title}
+  description={post.excerpt}
+  type="article"
+  publishedTime={post.publishedDate}
+  author={post.author}
+>
+  <article class="py-16 sm:py-20 bg-neutral-50">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Breadcrumb */}
+      <nav class="flex items-center gap-2 text-sm text-neutral-500 mb-8">
+        <a href="/blog" class="hover:text-brand-600 transition-colors">Blog</a>
+        <span>/</span>
+        {categoryName && (
+          <>
+            <span class="text-neutral-400">{categoryName}</span>
+            <span>/</span>
+          </>
+        )}
+        <span class="text-neutral-400 truncate max-w-[200px]">{post.title}</span>
+      </nav>
+
+      {/* Header */}
+      <header class="mb-10">
+        <div class="flex items-center gap-3 mb-4">
+          {categoryName && (
+            <span class="px-3 py-1 text-xs font-medium text-brand-700 bg-brand-50 rounded-full">
+              {categoryName}
+            </span>
+          )}
+          <span class="text-xs text-neutral-400">{post.readTime}</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-neutral-900 leading-tight">
+          {post.title}
+        </h1>
+        <div class="mt-4 flex items-center gap-4 text-sm text-neutral-500">
+          <span>{formatDate(post.publishedDate)}</span>
+          <span>&middot;</span>
+          <span>{post.author}</span>
+        </div>
+      </header>
+
+      {/* Content */}
+      <div class="prose">
+        {post.content.split('\n').map((line) => {
+          if (line.startsWith('## ')) {
+            return <h2 set:html={inlineMarkdown(line.replace('## ', ''))} />;
+          }
+          if (line.startsWith('### ')) {
+            return <h3 set:html={inlineMarkdown(line.replace('### ', ''))} />;
+          }
+          // Handle bold list items with ** markers
+          if (line.startsWith('- **')) {
+            const parts = line.slice(3);
+            const rendered = inlineMarkdown(parts);
+            return <li class="text-neutral-700" set:html={rendered} />;
+          }
+          if (line.startsWith('- ')) {
+            return <li class="text-neutral-700" set:html={inlineMarkdown(line.slice(2))} />;
+          }
+          if (line.trim() === '') {
+            return null;
+          }
+          return <p class="text-neutral-700" set:html={inlineMarkdown(line)} />;
+        })}
+      </div>
+
+      {/* Tags */}
+      {post.tags && post.tags.length > 0 && (
+        <div class="mt-10 pt-8 border-t border-neutral-200">
+          <div class="flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <span class="px-3 py-1 text-xs font-medium text-neutral-600 bg-neutral-100 rounded-full">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CTA */}
+      <div class="mt-10 bg-gradient-to-r from-brand-50 to-accent-50 rounded-xl p-6 text-center border border-brand-100">
+        <h3 class="text-lg font-bold text-neutral-900">Want to implement AI in your business?</h3>
+        <p class="mt-2 text-sm text-neutral-600">Book a free 1-hour consultation and let's build your AI roadmap.</p>
+        <a
+          href="/contact"
+          class="mt-4 inline-flex items-center px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors"
+        >
+          Free Consultation &rarr;
+        </a>
+      </div>
+    </div>
+  </article>
+</BaseLayout>

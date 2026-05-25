@@ -1,0 +1,25 @@
+---
+const stats = [
+  { value: "40+", label: "SA Businesses Served" },
+  { value: "R135K", label: "Avg. Annual Saving" },
+  { value: "30 days", label: "Avg. Time to ROI" },
+  { value: "4–7x", label: "Average AI ROI" },
+  { value: "Free", label: "1-Hour Consultation" },
+];
+---
+
+<div class="bg-brand-900 border-y border-brand-800" aria-label="Trust statistics">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+      {stats.map((stat, i) => (
+        <div class="flex items-center gap-2 min-w-fit">
+          <span class="text-accent-400 font-bold text-base whitespace-nowrap">{stat.value}</span>
+          <span class="text-brand-300 text-sm whitespace-nowrap">{stat.label}</span>
+          {i < stats.length - 1 && (
+            <span class="hidden sm:inline-block w-px h-4 bg-brand-700 ml-4" aria-hidden="true" />
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</div>

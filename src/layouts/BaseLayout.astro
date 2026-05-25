@@ -1,0 +1,62 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import SEOHead from '../components/SEOHead.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import StickyMobileCTA from '../components/StickyMobileCTA.astro';
+import ExitIntentPopup from '../components/ExitIntentPopup.astro';
+import SITE_CONFIG from '../lib/seo';
+
+export interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  author?: string;
+  noIndex?: boolean;
+}
+
+const {
+  title,
+  description = SITE_CONFIG.description,
+  canonical,
+  image = '/og-default.png',
+  type = 'website',
+  publishedTime,
+  author,
+  noIndex = false,
+} = Astro.props;
+
+const fullTitle = `${title} | ${SITE_CONFIG.name}`;
+---
+
+<!DOCTYPE html>
+<html lang="en-ZA">
+  <head>
+    <SEOHead
+      {title}
+      {fullTitle}
+      {description}
+      {canonical}
+      {image}
+      {type}
+      {publishedTime}
+      {author}
+      {noIndex}
+    />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <Header />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+    {/* Global UI/UX enhancements */}
+    <WhatsAppButton />
+    <StickyMobileCTA />
+    <ExitIntentPopup />
+  </body>
+</html>

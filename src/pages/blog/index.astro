@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogCard from '../../components/BlogCard.astro';
+import { blogPosts, blogCategories } from '../../data/blogPosts';
+import AIChat from '../../components/AIChat.astro';
+
+// Group posts by category for display
+const categoriesWithPosts = blogCategories
+  .filter((cat) => blogPosts.some((p) => p.category === cat.id))
+  .map((cat) => ({
+    ...cat,
+    posts: blogPosts.filter((p) => p.category === cat.id),
+  }));
+---
+
+<BaseLayout
+  title="Blog"
+  description="Expert insights on AI for business — healthcare, finance, e-commerce, education, and more. Practical guides, trends, and strategies."
+>
+  <section class="bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800 py-16 sm:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-white">AI Insights & Guides</h1>
+      <p class="mt-4 text-xl text-brand-100 max-w-2xl mx-auto">
+        Practical AI advice for every industry — from healthcare to logistics.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16 sm:py-20 bg-neutral-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {categoriesWithPosts.map((category) => (
+        <div class="mb-12 last:mb-0">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-bold text-neutral-900">{category.name}</h2>
+              <p class="text-sm text-neutral-500">{category.description}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {category.posts.map((post) => (
+              <BlogCard
+                slug={post.slug}
+                title={post.title}
+                excerpt={post.excerpt}
+                category={post.category}
+                categoryName={category.name}
+                publishedDate={post.publishedDate}
+                readTime={post.readTime}
+                tags={post.tags}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <AIChat prompt="Ask about any topic in our blog..." />
+</BaseLayout>

@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ServicesSection from '../components/ServicesSection.astro';
+import AIChat from '../components/AIChat.astro';
+---
+
+<BaseLayout
+  title="AI Services"
+  description="From AI strategy to full integration. Chatbots, automation, analytics, content engines — practical AI solutions for SMEs and startups."
+>
+  <section class="bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800 py-16 sm:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-white">Our Services</h1>
+      <p class="mt-4 text-xl text-brand-100 max-w-2xl mx-auto">
+        From a free strategy session to full AI integration — we meet you where you are.
+      </p>
+    </div>
+  </section>
+
+  <ServicesSection />
+
+  {/* Process */}
+  <section class="py-16 sm:py-20 bg-neutral-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <h2 class="text-3xl font-bold text-neutral-900">How It Works</h2>
+        <p class="mt-4 text-lg text-neutral-600">Our proven delivery pipeline — from discovery to deployment.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        {[
+          { step: '01', title: 'Discovery', desc: 'Free 1-hour consultation to understand your business, pain points, and goals.' },
+          { step: '02', title: 'Audit', desc: 'Deep analysis of your processes, data, and tech stack to identify AI opportunities.' },
+          { step: '03', title: 'Build', desc: 'Rapid AI development — your solution built and tested in days, not months.' },
+          { step: '04', title: 'Deploy', desc: 'Launch, training, and ongoing support. We don\'t just build — we ensure adoption.' },
+        ].map((item) => (
+          <div class="text-center">
+            <div class="text-5xl font-extrabold text-brand-200 mb-3">{item.step}</div>
+            <h3 class="text-lg font-semibold text-neutral-900">{item.title}</h3>
+            <p class="mt-2 text-sm text-neutral-600">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <AIChat prompt="Which service is right for my business?" />
+</BaseLayout>
