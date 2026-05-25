@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AuditTool from '../components/AuditTool.astro';
-// Password is baked in at build time from .env — never visible in source once compiled
+// Password baked in at build time — not visible in compiled output
 const pagePassword = import.meta.env.AUDIT_PAGE_PASSWORD || 'changeme';
 ---
 
@@ -96,55 +96,37 @@ const pagePassword = import.meta.env.AUDIT_PAGE_PASSWORD || 'changeme';
     </div>
   </section>
 
-  <!-- API key setup instructions (visible when no key is set) -->
+  <!-- Setup instructions — password only -->
   <section class="py-12 bg-white border-t border-neutral-200">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-xl font-bold text-neutral-900 mb-2">Setting Up Your API Key</h2>
+      <h2 class="text-xl font-bold text-neutral-900 mb-2">Setting Your Audit Page Password</h2>
       <p class="text-sm text-neutral-600 mb-6">
-        The audit tool uses the Claude AI API. You'll need a free Anthropic account and an API key.
-        The first $5 of API usage is free — each audit costs approximately $0.002 (less than half a cent).
+        The audit tool runs entirely in your browser — no API, no external calls, no cost.
+        The only setup needed is setting your access password.
       </p>
 
       <ol class="space-y-4 text-sm">
         <li class="flex gap-3">
           <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
           <div>
-            <p class="font-semibold text-neutral-800">Get your API key</p>
-            <p class="text-neutral-600 mt-0.5">Go to <a href="https://console.anthropic.com" target="_blank" rel="noopener" class="text-brand-600 hover:underline">console.anthropic.com</a> → sign up → API Keys → Create Key. Copy it.</p>
+            <p class="font-semibold text-neutral-800">Create a <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">.env</code> file</p>
+            <p class="text-neutral-600 mt-0.5">In your <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">AI Consultation/</code> folder, create a file named <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">.env</code> containing:</p>
+            <pre class="mt-2 bg-neutral-900 text-accent-300 text-xs px-4 py-3 rounded-lg overflow-x-auto">AUDIT_PAGE_PASSWORD=your-strong-password-here</pre>
           </div>
         </li>
         <li class="flex gap-3">
           <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
           <div>
-            <p class="font-semibold text-neutral-800">Create a <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">.env</code> file</p>
-            <p class="text-neutral-600 mt-0.5">In your <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">AI Consultation/</code> folder, create a file named <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">.env</code> containing:</p>
-            <pre class="mt-2 bg-neutral-900 text-accent-300 text-xs px-4 py-3 rounded-lg overflow-x-auto">PUBLIC_CLAUDE_API_KEY=sk-ant-your-key-here</pre>
+            <p class="font-semibold text-neutral-800">Add the secret to GitHub</p>
+            <p class="text-neutral-600 mt-0.5">GitHub repo → <strong>Settings → Secrets and variables → Actions → New repository secret</strong></p>
+            <p class="text-neutral-600 mt-1">Name: <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">AUDIT_PAGE_PASSWORD</code> · Value: your chosen password</p>
           </div>
         </li>
         <li class="flex gap-3">
           <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
           <div>
-            <p class="font-semibold text-neutral-800">Add the secret to GitHub</p>
-            <p class="text-neutral-600 mt-0.5">GitHub repo → <strong>Settings → Secrets and variables → Actions → New repository secret</strong></p>
-            <p class="text-neutral-600 mt-1">Name: <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">PUBLIC_CLAUDE_API_KEY</code> · Value: your key</p>
-          </div>
-        </li>
-        <li class="flex gap-3">
-          <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
-          <div>
-            <p class="font-semibold text-neutral-800">Update your deploy workflow</p>
-            <p class="text-neutral-600 mt-0.5">In <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">.github/workflows/deploy.yml</code>, update the build step to:</p>
-            <pre class="mt-2 bg-neutral-900 text-accent-300 text-xs px-4 py-3 rounded-lg overflow-x-auto">- name: Build with Astro
-  run: npm run build
-  env:
-    PUBLIC_CLAUDE_API_KEY: $&#123;&#123; secrets.PUBLIC_CLAUDE_API_KEY &#125;&#125;</pre>
-          </div>
-        </li>
-        <li class="flex gap-3">
-          <span class="flex-shrink-0 w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">5</span>
-          <div>
             <p class="font-semibold text-neutral-800">Push and redeploy</p>
-            <p class="text-neutral-600 mt-0.5">Run <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">git add . && git commit -m "feat: add API key to deploy" && git push</code> — GitHub Actions will rebuild and the tool will be live.</p>
+            <p class="text-neutral-600 mt-0.5">Run <code class="bg-neutral-100 px-1.5 py-0.5 rounded text-xs">git add . && git commit -m "chore: set audit password" && git push</code> — GitHub Actions will rebuild with your password baked in.</p>
           </div>
         </li>
       </ol>
