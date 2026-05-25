@@ -1,12 +1,57 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AuditTool from '../components/AuditTool.astro';
+// Password is baked in at build time from .env — never visible in source once compiled
+const pagePassword = import.meta.env.AUDIT_PAGE_PASSWORD || 'changeme';
 ---
 
 <BaseLayout
-  title="Free AI Audit Tool"
-  description="Paste in your business details and get a personalised AI implementation report in 60 seconds. Free, instant, no email required."
+  title="AI Audit Tool — Internal"
+  description="Internal AI audit tool."
+  noIndex={true}
 >
+
+  <!-- ── PASSWORD GATE ── -->
+  <!-- Wraps everything. Shows lock screen until correct password entered. -->
+  <div x-data="auditGate()" x-init="check()" class="min-h-screen">
+
+    <!-- Lock screen — shown until authenticated -->
+    <div
+      x-show="!unlocked"
+      class="min-h-screen flex items-center justify-center bg-brand-950 px-4"
+      style="display:none;"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center">
+        <div class="w-14 h-14 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold text-neutral-900">Internal Tool</h1>
+        <p class="mt-1 text-sm text-neutral-500">Enter your access password to continue.</p>
+
+        <form @submit.prevent="attempt" class="mt-6 space-y-4">
+          <input
+            type="password"
+            x-model="input"
+            placeholder="Password"
+            autocomplete="current-password"
+            class="w-full px-4 py-3 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-center tracking-widest"
+            autofocus
+          />
+          <p x-show="failed" class="text-sm text-red-600">Incorrect password. Try again.</p>
+          <button
+            type="submit"
+            class="w-full py-3 px-6 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors"
+          >
+            Unlock
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Protected content — shown only when unlocked -->
+    <div x-show="unlocked" style="display:none;">
 
   <!-- Hero -->
   <section class="bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800 py-14 sm:py-20">
@@ -131,4 +176,40 @@ import AuditTool from '../components/AuditTool.astro';
     </div>
   </section>
 
+    </div>{/* end x-show="unlocked" */}
+  </div>{/* end auditGate wrapper */}
+
 </BaseLayout>
+
+<script define:vars={{ pagePassword }}>
+(function() {
+  const CORRECT = pagePassword;
+  const KEY = 'bs_audit_unlocked';
+
+  window.auditGate = function() {
+    return {
+      unlocked: false,
+      input: '',
+      failed: false,
+
+      check() {
+        // Already authenticated this session?
+        if (sessionStorage.getItem(KEY) === '1') {
+          this.unlocked = true;
+        }
+      },
+
+      attempt() {
+        if (this.input === CORRECT) {
+          sessionStorage.setItem(KEY, '1');
+          this.unlocked = true;
+          this.failed = false;
+        } else {
+          this.failed = true;
+          this.input = '';
+        }
+      },
+    };
+  };
+})();
+</script>

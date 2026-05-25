@@ -34,6 +34,7 @@ jobs:
         run: npm run build
         env:
           PUBLIC_CLAUDE_API_KEY: ${{ secrets.PUBLIC_CLAUDE_API_KEY }}
+          AUDIT_PAGE_PASSWORD: ${{ secrets.AUDIT_PAGE_PASSWORD }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
