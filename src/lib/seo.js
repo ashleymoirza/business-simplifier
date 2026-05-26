@@ -10,7 +10,7 @@ const SITE_CONFIG = {
   url: 'https://businesssimplifier.co.za',
   locale: 'en_ZA',
   localeAlt: 'en_US',
-  twitter: '@BizSimplifier_ZA',
+  twitter: '@BizSimplifierZA',
 };
 
 /**

@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 500" width="1500" height="500">
+  <defs>
+    <linearGradient id="headerBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#112b4d;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#1362c2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#112b4d;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentLine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#18f7ea;stop-opacity:0" />
+      <stop offset="30%" style="stop-color:#18f7ea;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#18f7ea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#18f7ea;stop-opacity:0" />
+    </linearGradient>
+    <linearGradient id="glowLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#18f7ea;stop-opacity:0.12" />
+      <stop offset="100%" style="stop-color:#18f7ea;stop-opacity:0" />
+    </linearGradient>
+    <linearGradient id="glowRight" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a7ae6;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#1a7ae6;stop-opacity:0" />
+    </linearGradient>
+    <!-- Grid pattern -->
+    <pattern id="gridHdr" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#1a7ae6" stroke-width="0.6" opacity="0.2"/>
+    </pattern>
+  </defs>
+
+  <!-- Base background -->
+  <rect width="1500" height="500" fill="url(#headerBg)"/>
+  <!-- Grid overlay -->
+  <rect width="1500" height="500" fill="url(#gridHdr)"/>
+  <!-- Glow blobs -->
+  <ellipse cx="180" cy="180" rx="280" ry="220" fill="url(#glowLeft)"/>
+  <ellipse cx="1320" cy="320" rx="260" ry="200" fill="url(#glowRight)"/>
+
+  <!-- Decorative circles top-left -->
+  <circle cx="80" cy="80" r="200" fill="none" stroke="#18f7ea" stroke-width="1" opacity="0.12"/>
+  <circle cx="80" cy="80" r="140" fill="none" stroke="#18f7ea" stroke-width="1" opacity="0.1"/>
+  <!-- Decorative circles bottom-right -->
+  <circle cx="1420" cy="420" r="180" fill="none" stroke="#1a7ae6" stroke-width="1" opacity="0.15"/>
+  <circle cx="1420" cy="420" r="120" fill="none" stroke="#1a7ae6" stroke-width="1" opacity="0.1"/>
+
+  <!-- Floating dots / nodes — circuit-board feel -->
+  <circle cx="300" cy="420" r="4" fill="#18f7ea" opacity="0.5"/>
+  <circle cx="360" cy="390" r="2.5" fill="#18f7ea" opacity="0.4"/>
+  <line x1="300" y1="420" x2="360" y2="390" stroke="#18f7ea" stroke-width="1" opacity="0.3"/>
+  <circle cx="1180" cy="90" r="4" fill="#18f7ea" opacity="0.5"/>
+  <circle cx="1240" cy="120" r="2.5" fill="#18f7ea" opacity="0.4"/>
+  <line x1="1180" y1="90" x2="1240" y2="120" stroke="#18f7ea" stroke-width="1" opacity="0.3"/>
+  <circle cx="1100" cy="70" r="3" fill="#58b8ff" opacity="0.4"/>
+  <line x1="1100" y1="70" x2="1180" y2="90" stroke="#58b8ff" stroke-width="1" opacity="0.25"/>
+  <circle cx="420" cy="60" r="3" fill="#58b8ff" opacity="0.4"/>
+  <circle cx="480" cy="90" r="2" fill="#58b8ff" opacity="0.35"/>
+  <line x1="420" y1="60" x2="480" y2="90" stroke="#58b8ff" stroke-width="1" opacity="0.25"/>
+
+  <!-- ── Main content — centred ── -->
+
+  <!-- Brand name — large -->
+  <text
+    x="750"
+    y="210"
+    font-family="'Inter', 'Arial Black', Arial, sans-serif"
+    font-size="92"
+    font-weight="900"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="-2"
+  >Business Simplifier</text>
+
+  <!-- Accent divider line -->
+  <rect x="480" y="228" width="540" height="4" rx="2" fill="url(#accentLine)"/>
+
+  <!-- Tagline -->
+  <text
+    x="750"
+    y="295"
+    font-family="'Inter', Arial, sans-serif"
+    font-size="30"
+    font-weight="400"
+    fill="#8ed2ff"
+    text-anchor="middle"
+    letter-spacing="0.5"
+  >AI That Simplifies Your Business</text>
+
+  <!-- Three pillars row -->
+  <!-- Pill 1 -->
+  <rect x="390" y="335" width="200" height="44" rx="22" fill="#1a7ae6" opacity="0.5"/>
+  <text x="490" y="363" font-family="'Inter', Arial, sans-serif" font-size="18" font-weight="600" fill="white" text-anchor="middle">Chatbots</text>
+
+  <!-- Pill 2 -->
+  <rect x="650" y="335" width="200" height="44" rx="22" fill="#1a7ae6" opacity="0.5"/>
+  <text x="750" y="363" font-family="'Inter', Arial, sans-serif" font-size="18" font-weight="600" fill="white" text-anchor="middle">Automation</text>
+
+  <!-- Pill 3 -->
+  <rect x="910" y="335" width="200" height="44" rx="22" fill="#1a7ae6" opacity="0.5"/>
+  <text x="1010" y="363" font-family="'Inter', Arial, sans-serif" font-size="18" font-weight="600" fill="white" text-anchor="middle">Analytics</text>
+
+  <!-- Website URL bottom -->
+  <text
+    x="750"
+    y="445"
+    font-family="'Inter', Arial, sans-serif"
+    font-size="22"
+    font-weight="500"
+    fill="#18f7ea"
+    text-anchor="middle"
+    opacity="0.85"
+  >businesssimplifier.co.za</text>
+
+  <!-- Small accent dot left of URL -->
+  <circle cx="595" cy="440" r="3.5" fill="#18f7ea" opacity="0.7"/>
+  <!-- Small accent dot right of URL -->
+  <circle cx="905" cy="440" r="3.5" fill="#18f7ea" opacity="0.7"/>
+</svg>

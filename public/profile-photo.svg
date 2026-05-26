@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#112b4d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1362c2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#18f7ea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a7ae6;stop-opacity:1" />
+    </linearGradient>
+    <!-- Subtle grid pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a7ae6" stroke-width="0.5" opacity="0.3"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="400" fill="url(#bgGrad)" rx="40"/>
+  <!-- Subtle grid overlay -->
+  <rect width="400" height="400" fill="url(#grid)" rx="40"/>
+
+  <!-- Decorative arc top-right -->
+  <circle cx="370" cy="30" r="120" fill="none" stroke="#18f7ea" stroke-width="1.5" opacity="0.15"/>
+  <circle cx="370" cy="30" r="90" fill="none" stroke="#18f7ea" stroke-width="1" opacity="0.1"/>
+
+  <!-- Decorative arc bottom-left -->
+  <circle cx="30" cy="370" r="100" fill="none" stroke="#1a7ae6" stroke-width="1.5" opacity="0.2"/>
+
+  <!-- Central icon: simplified "BS" monogram in a hexagon shape -->
+  <!-- Hexagon -->
+  <polygon
+    points="200,100 270,140 270,220 200,260 130,220 130,140"
+    fill="none"
+    stroke="url(#accentGrad)"
+    stroke-width="3"
+    opacity="0.9"
+  />
+  <!-- Inner hexagon fill -->
+  <polygon
+    points="200,108 263,144 263,216 200,252 137,216 137,144"
+    fill="#1a7ae6"
+    opacity="0.25"
+  />
+
+  <!-- "BS" monogram -->
+  <!-- B -->
+  <text
+    x="168"
+    y="200"
+    font-family="'Inter', 'Arial Black', sans-serif"
+    font-size="68"
+    font-weight="900"
+    fill="white"
+    letter-spacing="-2"
+  >BS</text>
+
+  <!-- Accent underline bar -->
+  <rect x="140" y="272" width="120" height="4" rx="2" fill="url(#accentGrad)"/>
+
+  <!-- Wordmark -->
+  <text
+    x="200"
+    y="318"
+    font-family="'Inter', Arial, sans-serif"
+    font-size="18"
+    font-weight="700"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="1"
+  >BUSINESS</text>
+  <text
+    x="200"
+    y="340"
+    font-family="'Inter', Arial, sans-serif"
+    font-size="18"
+    font-weight="700"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="1"
+  >SIMPLIFIER</text>
+
+  <!-- Tagline dot accent -->
+  <circle cx="200" cy="362" r="3" fill="#18f7ea"/>
+</svg>
