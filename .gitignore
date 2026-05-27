@@ -14,6 +14,11 @@ npm-debug.log*
 # Nested git repos / client projects
 cornemylesattorneys/
 
+# Python backend — runs locally / on VPS, not part of GitHub Pages build
+backend/__pycache__/
+backend/*.pyc
+backend/.env
+
 # OS
 .DS_Store
 Thumbs.db
